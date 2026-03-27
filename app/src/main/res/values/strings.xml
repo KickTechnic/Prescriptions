@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Prescription Tracker</string>
+    <string name="notification_channel_name">Prescription Reminders</string>
+    <string name="notification_channel_description">Daily reminders to reorder prescriptions</string>
+    <string name="widget_description">Shows your prescriptions sorted by urgency</string>
+</resources>

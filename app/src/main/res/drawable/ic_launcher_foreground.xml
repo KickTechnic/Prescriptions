@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Background circle -->
+    <path
+        android:fillColor="#2F4F7F"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0" />
+    <!-- Pill icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36.22,43.29L43.29,36.22C45.07,34.44 47.94,34.44 49.72,36.22L51.78,38.28C53.56,40.06 53.56,42.93 51.78,44.71L44.71,51.78C42.93,53.56 40.06,53.56 38.28,51.78L36.22,49.72C34.44,47.94 34.44,45.07 36.22,43.29ZM37.64,48.31L39.69,50.36C40.69,51.36 42.31,51.36 43.31,50.36L44,49.66L38.34,44L37.64,44.69C36.64,45.69 36.64,47.31 37.64,48.31Z" />
+    <!-- Plus symbol -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,54L60,60L66,60L66,64L60,64L60,70L56,70L56,64L50,64L50,60L56,60L56,54Z" />
+</vector>
