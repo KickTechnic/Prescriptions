@@ -7,17 +7,21 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.updateAll
 import com.prescription.tracker.data.AppDatabase
 import com.prescription.tracker.data.MedicationEntity
+import com.prescription.tracker.data.PickupHistoryEntity
 import com.prescription.tracker.data.SettingsManager
 import com.prescription.tracker.widget.PrescriptionWidget
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class EditMedicationViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val dao = AppDatabase.getInstance(application).medicationDao()
+    private val db = AppDatabase.getInstance(application)
+    private val dao = db.medicationDao()
+    private val pickupHistoryDao = db.pickupHistoryDao()
     val settings = SettingsManager(application)
 
     private val _uiState = MutableStateFlow(EditUiState())
@@ -30,6 +34,9 @@ class EditMedicationViewModel(application: Application) : AndroidViewModel(appli
     val deleted: StateFlow<Boolean> = _deleted.asStateFlow()
 
     private var editingId: Long? = null
+
+    private val _pickupHistory = MutableStateFlow<List<PickupHistoryEntity>>(emptyList())
+    val pickupHistory: StateFlow<List<PickupHistoryEntity>> = _pickupHistory.asStateFlow()
 
     fun loadMedication(id: Long) {
         viewModelScope.launch {
@@ -44,6 +51,11 @@ class EditMedicationViewModel(application: Application) : AndroidViewModel(appli
                 remainingDaysOverride = med.remainingDaysOverride?.toString() ?: "",
                 isEditing = true
             )
+        }
+        viewModelScope.launch {
+            pickupHistoryDao.getHistoryForMedication(id).collect { history ->
+                _pickupHistory.value = history
+            }
         }
     }
 
@@ -81,6 +93,7 @@ class EditMedicationViewModel(application: Application) : AndroidViewModel(appli
         val id = editingId ?: return
         viewModelScope.launch {
             dao.markPickedUp(id, date)
+            pickupHistoryDao.insert(PickupHistoryEntity(medicationId = id, pickupDate = date))
             refreshWidget()
             _saved.value = true
         }

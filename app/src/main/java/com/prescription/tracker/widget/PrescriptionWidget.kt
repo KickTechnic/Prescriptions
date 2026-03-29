@@ -47,7 +47,7 @@ class PrescriptionWidget : GlanceAppWidget() {
         val dao = AppDatabase.getInstance(context).medicationDao()
         val settings = SettingsManager(context).settingsFlow.value
         val medications = dao.getAll()
-        val withStatus = StatusCalculator.calculateAll(medications, settings.globalLeadDays)
+        val withStatus = StatusCalculator.calculateAll(medications, settings.globalLeadDays, settings.useBusinessDays)
         val bgAlpha = settings.widgetBackgroundAlpha
         val itemAlpha = settings.widgetItemAlpha
 

@@ -19,6 +19,8 @@ class SettingsManager(context: Context) {
         val notificationHour: Int = 9,
         val notificationMinute: Int = 0,
         val notificationsEnabled: Boolean = true,
+        val useBusinessDays: Boolean = true,
+        val adsRemoved: Boolean = false,
         val widgetBackgroundAlpha: Float = 0.85f,
         val widgetItemAlpha: Float = 0.95f
     )
@@ -28,6 +30,8 @@ class SettingsManager(context: Context) {
         notificationHour = prefs.getInt("notification_hour", 9),
         notificationMinute = prefs.getInt("notification_minute", 0),
         notificationsEnabled = prefs.getBoolean("notifications_enabled", true),
+        useBusinessDays = prefs.getBoolean("use_business_days", true),
+        adsRemoved = prefs.getBoolean("ads_removed", false),
         widgetBackgroundAlpha = prefs.getFloat("widget_bg_alpha", 0.85f),
         widgetItemAlpha = prefs.getFloat("widget_item_alpha", 0.95f)
     )
@@ -47,6 +51,16 @@ class SettingsManager(context: Context) {
 
     fun setNotificationsEnabled(enabled: Boolean) {
         prefs.edit().putBoolean("notifications_enabled", enabled).apply()
+        _settingsFlow.value = currentSettings()
+    }
+
+    fun setUseBusinessDays(enabled: Boolean) {
+        prefs.edit().putBoolean("use_business_days", enabled).apply()
+        _settingsFlow.value = currentSettings()
+    }
+
+    fun setAdsRemoved(removed: Boolean) {
+        prefs.edit().putBoolean("ads_removed", removed).apply()
         _settingsFlow.value = currentSettings()
     }
 

@@ -9,6 +9,7 @@ object StatusCalculator {
     fun calculate(
         medication: MedicationEntity,
         globalLeadDays: Int,
+        useBusinessDays: Boolean = true,
         today: LocalDate = LocalDate.now()
     ): MedicationWithStatus {
         val runsOutDate = if (medication.remainingDaysOverride != null && medication.overrideDate != null) {
@@ -18,7 +19,11 @@ object StatusCalculator {
         }
 
         val effectiveLeadDays = medication.orderLeadDays ?: globalLeadDays
-        val orderByDate = minusBusinessDays(runsOutDate, effectiveLeadDays)
+        val orderByDate = if (useBusinessDays) {
+            minusBusinessDays(runsOutDate, effectiveLeadDays)
+        } else {
+            runsOutDate.minusDays(effectiveLeadDays.toLong())
+        }
 
         val status = when {
             runsOutDate.isBefore(today) || runsOutDate.isEqual(today) -> MedicationStatus.OVERDUE
@@ -50,10 +55,11 @@ object StatusCalculator {
     fun calculateAll(
         medications: List<MedicationEntity>,
         globalLeadDays: Int,
+        useBusinessDays: Boolean = true,
         today: LocalDate = LocalDate.now()
     ): List<MedicationWithStatus> {
         return medications
-            .map { calculate(it, globalLeadDays, today) }
+            .map { calculate(it, globalLeadDays, useBusinessDays, today) }
             .sortedWith(
                 compareBy<MedicationWithStatus> { it.status.ordinal }
                     .reversed()

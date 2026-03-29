@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.updateAll
 import com.prescription.tracker.data.AppDatabase
+import com.prescription.tracker.data.PickupHistoryEntity
 import com.prescription.tracker.widget.PrescriptionWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,8 +24,11 @@ class PickedUpReceiver : BroadcastReceiver() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val dao = AppDatabase.getInstance(context).medicationDao()
-                dao.markPickedUp(medicationId, LocalDate.now())
+                val db = AppDatabase.getInstance(context)
+                val dao = db.medicationDao()
+                val today = LocalDate.now()
+                dao.markPickedUp(medicationId, today)
+                db.pickupHistoryDao().insert(PickupHistoryEntity(medicationId = medicationId, pickupDate = today))
 
                 // Dismiss the notification
                 if (notificationId >= 0) {

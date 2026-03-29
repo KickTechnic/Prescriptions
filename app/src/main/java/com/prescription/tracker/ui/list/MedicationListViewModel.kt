@@ -10,6 +10,7 @@ import com.prescription.tracker.domain.StatusCalculator
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 class MedicationListViewModel(application: Application) : AndroidViewModel(application) {
@@ -19,6 +20,10 @@ class MedicationListViewModel(application: Application) : AndroidViewModel(appli
 
     val medications: StateFlow<List<MedicationWithStatus>> =
         combine(dao.getAllFlow(), settings.settingsFlow) { meds, s ->
-            StatusCalculator.calculateAll(meds, s.globalLeadDays)
+            StatusCalculator.calculateAll(meds, s.globalLeadDays, s.useBusinessDays)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val adsRemoved: StateFlow<Boolean> =
+        settings.settingsFlow.map { it.adsRemoved }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 }

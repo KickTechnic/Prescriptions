@@ -64,6 +64,7 @@ fun EditMedicationScreen(
     val saved by viewModel.saved.collectAsState()
     val deleted by viewModel.deleted.collectAsState()
     val settings by viewModel.settings.settingsFlow.collectAsState()
+    val pickupHistory by viewModel.pickupHistory.collectAsState()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPickupDatePicker by remember { mutableStateOf(false) }
@@ -294,6 +295,35 @@ fun EditMedicationScreen(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Adjust Supply")
+                    }
+                }
+
+                // Pickup History
+                if (pickupHistory.isNotEmpty()) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                    Text(
+                        "Pickup History",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    val displayHistory = pickupHistory.take(10)
+                    displayHistory.forEach { entry ->
+                        Text(
+                            text = entry.pickupDate.format(dateFormatter),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        )
+                    }
+                    if (pickupHistory.size > 10) {
+                        Text(
+                            text = "${pickupHistory.size - 10} more...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }

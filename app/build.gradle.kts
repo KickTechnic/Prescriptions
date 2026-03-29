@@ -70,6 +70,12 @@ dependencies {
     implementation("androidx.glance:glance-appwidget:1.1.1")
     implementation("androidx.glance:glance-material3:1.1.1")
 
+    // AdMob
+    implementation("com.google.android.gms:play-services-ads:24.3.0")
+
+    // Google Play Billing
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

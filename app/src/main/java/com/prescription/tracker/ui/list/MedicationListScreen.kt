@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.prescription.tracker.domain.MedicationStatus
 import com.prescription.tracker.domain.MedicationWithStatus
+import com.prescription.tracker.ui.ads.AdBanner
 import com.prescription.tracker.ui.theme.StatusAmberBg
 import com.prescription.tracker.ui.theme.StatusAmberText
 import com.prescription.tracker.ui.theme.StatusGreenBg
@@ -62,6 +63,7 @@ fun MedicationListScreen(
     viewModel: MedicationListViewModel = viewModel()
 ) {
     val medications by viewModel.medications.collectAsState()
+    val adsRemoved by viewModel.adsRemoved.collectAsState()
 
     Scaffold(
         topBar = {
@@ -88,11 +90,19 @@ fun MedicationListScreen(
             }
         }
     ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            if (!adsRemoved) {
+                AdBanner(modifier = Modifier.fillMaxWidth())
+            }
+
         if (medications.isEmpty()) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                    .fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -113,7 +123,6 @@ fun MedicationListScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -124,6 +133,7 @@ fun MedicationListScreen(
                     )
                 }
             }
+        }
         }
     }
 }

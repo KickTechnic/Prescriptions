@@ -1,5 +1,6 @@
 package com.prescription.tracker.ui.settings
 
+import android.app.Activity
 import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,12 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -91,6 +95,25 @@ fun SettingsScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Skip weekends", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "Doctors don't process orders on weekends",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = settings.useBusinessDays,
+                    onCheckedChange = { viewModel.settings.setUseBusinessDays(it) }
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -189,6 +212,50 @@ fun SettingsScreen(
                         valueRange = settings.widgetBackgroundAlpha..1f,
                         steps = ((1f - settings.widgetBackgroundAlpha) * 20).toInt().coerceAtLeast(0)
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Ads section
+            Text("Ads", style = MaterialTheme.typography.titleMedium)
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (settings.adsRemoved) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Ads removed", style = MaterialTheme.typography.bodyLarge)
+                        }
+                    } else {
+                        Column {
+                            Text("Remove ads", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "One-time purchase to remove banner ads",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Button(onClick = {
+                            (context as? Activity)?.let { viewModel.launchRemoveAds(it) }
+                        }) {
+                            Text("Purchase")
+                        }
+                    }
                 }
             }
         }
