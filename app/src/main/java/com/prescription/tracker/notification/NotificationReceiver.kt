@@ -15,6 +15,7 @@ import com.prescription.tracker.domain.StatusCalculator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.format.DateTimeFormatter
 
 class NotificationReceiver : BroadcastReceiver() {
 
@@ -31,6 +32,8 @@ class NotificationReceiver : BroadcastReceiver() {
             }
         }
     }
+
+    private val dateFormatter = DateTimeFormatter.ofPattern("EEE dd MMM")
 
     private suspend fun sendNotifications(context: Context) {
         val dao = AppDatabase.getInstance(context).medicationDao()
@@ -58,7 +61,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 }
                 MedicationStatus.ORDER_SOON -> {
                     val person = if (med.personName != null) "${med.personName}'s " else ""
-                    "${person}${med.name} needs ordering soon" to "Runs out on ${med.runsOutDate}. Order by ${med.orderByDate}."
+                    "${person}${med.name} needs ordering soon" to "Runs out on ${med.runsOutDate.format(dateFormatter)}. Order by ${med.orderByDate.format(dateFormatter)}."
                 }
                 else -> return@forEachIndexed
             }

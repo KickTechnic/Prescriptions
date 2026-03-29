@@ -51,7 +51,7 @@ import com.prescription.tracker.ui.theme.StatusRedBg
 import com.prescription.tracker.ui.theme.StatusRedText
 import java.time.format.DateTimeFormatter
 
-private val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+private val dateFormatter = DateTimeFormatter.ofPattern("EEE dd MMM yyyy")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

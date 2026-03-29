@@ -51,7 +51,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-private val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+private val dateFormatter = DateTimeFormatter.ofPattern("EEE dd MMM yyyy")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

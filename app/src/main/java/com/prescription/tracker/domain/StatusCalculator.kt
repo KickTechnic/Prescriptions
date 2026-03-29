@@ -1,6 +1,7 @@
 package com.prescription.tracker.domain
 
 import com.prescription.tracker.data.MedicationEntity
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 object StatusCalculator {
@@ -17,7 +18,7 @@ object StatusCalculator {
         }
 
         val effectiveLeadDays = medication.orderLeadDays ?: globalLeadDays
-        val orderByDate = runsOutDate.minusDays(effectiveLeadDays.toLong())
+        val orderByDate = minusBusinessDays(runsOutDate, effectiveLeadDays)
 
         val status = when {
             runsOutDate.isBefore(today) || runsOutDate.isEqual(today) -> MedicationStatus.OVERDUE
@@ -32,6 +33,18 @@ object StatusCalculator {
             orderByDate = orderByDate,
             status = status
         )
+    }
+
+    private fun minusBusinessDays(from: LocalDate, businessDays: Int): LocalDate {
+        var date = from
+        var remaining = businessDays
+        while (remaining > 0) {
+            date = date.minusDays(1)
+            if (date.dayOfWeek != DayOfWeek.SATURDAY && date.dayOfWeek != DayOfWeek.SUNDAY) {
+                remaining--
+            }
+        }
+        return date
     }
 
     fun calculateAll(

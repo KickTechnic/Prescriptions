@@ -21,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -148,6 +149,46 @@ fun SettingsScreen(
                             )
                         }
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Widget section
+            Text("Widget", style = MaterialTheme.typography.titleMedium)
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Widget background opacity", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "${(settings.widgetBackgroundAlpha * 100).toInt()}%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Slider(
+                        value = settings.widgetBackgroundAlpha,
+                        onValueChange = { viewModel.setWidgetBackgroundAlpha(it) },
+                        valueRange = 0f..1f,
+                        steps = 19
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text("Item background opacity", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "${(settings.widgetItemAlpha * 100).toInt()}%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Slider(
+                        value = settings.widgetItemAlpha,
+                        onValueChange = { viewModel.setWidgetItemAlpha(it) },
+                        valueRange = settings.widgetBackgroundAlpha..1f,
+                        steps = ((1f - settings.widgetBackgroundAlpha) * 20).toInt().coerceAtLeast(0)
+                    )
                 }
             }
         }

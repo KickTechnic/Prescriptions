@@ -41,27 +41,33 @@ import java.time.format.DateTimeFormatter
 
 class PrescriptionWidget : GlanceAppWidget() {
 
-    private val dateFormatter = DateTimeFormatter.ofPattern("dd MMM")
+    private val dateFormatter = DateTimeFormatter.ofPattern("EEE dd MMM")
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val dao = AppDatabase.getInstance(context).medicationDao()
         val settings = SettingsManager(context).settingsFlow.value
         val medications = dao.getAll()
         val withStatus = StatusCalculator.calculateAll(medications, settings.globalLeadDays)
+        val bgAlpha = settings.widgetBackgroundAlpha
+        val itemAlpha = settings.widgetItemAlpha
 
         provideContent {
             GlanceTheme {
-                WidgetContent(withStatus)
+                WidgetContent(withStatus, bgAlpha, itemAlpha)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(medications: List<MedicationWithStatus>) {
+    private fun WidgetContent(
+        medications: List<MedicationWithStatus>,
+        bgAlpha: Float,
+        itemAlpha: Float
+    ) {
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(WIDGET_BG.copy(alpha = bgAlpha))
                 .padding(8.dp)
         ) {
             // Header
@@ -70,7 +76,7 @@ class PrescriptionWidget : GlanceAppWidget() {
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = ColorProvider(Color(0xFF2F4F7F))
+                    color = ColorProvider(Color(0xFFE0E0E0))
                 ),
                 modifier = GlanceModifier.padding(bottom = 4.dp)
             )
@@ -82,13 +88,13 @@ class PrescriptionWidget : GlanceAppWidget() {
                 ) {
                     Text(
                         text = "No prescriptions",
-                        style = TextStyle(color = ColorProvider(Color.Gray))
+                        style = TextStyle(color = ColorProvider(Color(0xFF9E9E9E)))
                     )
                 }
             } else {
                 LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
                     items(medications, itemId = { it.id }) { med ->
-                        WidgetRow(med)
+                        WidgetRow(med, itemAlpha)
                     }
                 }
             }
@@ -96,18 +102,18 @@ class PrescriptionWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun WidgetRow(med: MedicationWithStatus) {
+    private fun WidgetRow(med: MedicationWithStatus, itemAlpha: Float) {
         val (bgColor, textColor, emoji) = when (med.status) {
-            MedicationStatus.OK -> Triple(Color(0xFFC6EFCE), Color(0xFF276221), "\uD83D\uDFE2")
-            MedicationStatus.ORDER_SOON -> Triple(Color(0xFFFFEB9C), Color(0xFF9C6500), "\uD83D\uDFE1")
-            MedicationStatus.ORDER_NOW -> Triple(Color(0xFFFFC7CE), Color(0xFF9C0006), "\uD83D\uDD34")
-            MedicationStatus.OVERDUE -> Triple(Color(0xFFFFC7CE), Color(0xFF9C0006), "\u274C")
+            MedicationStatus.OK -> Triple(Color(0xFF1B3A26), Color(0xFF8CD99E), "\uD83D\uDFE2")
+            MedicationStatus.ORDER_SOON -> Triple(Color(0xFF3A3118), Color(0xFFFFD966), "\uD83D\uDFE1")
+            MedicationStatus.ORDER_NOW -> Triple(Color(0xFF3A1820), Color(0xFFFF8A9E), "\uD83D\uDD34")
+            MedicationStatus.OVERDUE -> Triple(Color(0xFF3A1820), Color(0xFFFF8A9E), "\u274C")
         }
 
         Row(
             modifier = GlanceModifier
                 .fillMaxWidth()
-                .background(bgColor)
+                .background(bgColor.copy(alpha = itemAlpha))
                 .padding(horizontal = 8.dp, vertical = 6.dp)
                 .clickable(actionStartActivity<MainActivity>()),
             verticalAlignment = Alignment.CenterVertically
@@ -158,5 +164,9 @@ class PrescriptionWidget : GlanceAppWidget() {
             }
         }
         Spacer(modifier = GlanceModifier.height(2.dp))
+    }
+
+    companion object {
+        private val WIDGET_BG = Color(0xFF1A1A2E)
     }
 }
