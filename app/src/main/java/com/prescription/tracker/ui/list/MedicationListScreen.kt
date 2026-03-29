@@ -90,19 +90,11 @@ fun MedicationListScreen(
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            if (!adsRemoved) {
-                AdBanner(modifier = Modifier.fillMaxWidth())
-            }
-
         if (medications.isEmpty()) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -120,20 +112,43 @@ fun MedicationListScreen(
                 }
             }
         } else {
+            val adPosition = 2.coerceAtMost(medications.size)
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(padding)
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(medications, key = { it.id }) { med ->
-                    MedicationCard(
-                        medication = med,
-                        onClick = { onMedicationClick(med.id) }
-                    )
+                medications.forEachIndexed { index, med ->
+                    item(key = med.id) {
+                        MedicationCard(
+                            medication = med,
+                            onClick = { onMedicationClick(med.id) }
+                        )
+                    }
+                    if (index == adPosition - 1 && !adsRemoved) {
+                        item(key = "ad_banner") {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    AdBanner()
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }
         }
     }
 }
