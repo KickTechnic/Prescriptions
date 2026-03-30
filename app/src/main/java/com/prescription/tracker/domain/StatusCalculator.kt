@@ -13,7 +13,26 @@ object StatusCalculator {
         today: LocalDate = LocalDate.now()
     ): MedicationWithStatus {
         val runsOutDate = if (medication.remainingDaysOverride != null && medication.overrideDate != null) {
-            medication.overrideDate.plusDays(medication.remainingDaysOverride.toLong())
+            // Override: remaining is in units if totalUnits is set, otherwise in days
+            if (medication.totalUnits != null) {
+                calculateRunsOutFromUnits(
+                    startDate = medication.overrideDate,
+                    remainingUnits = medication.remainingDaysOverride,
+                    unitsPerDay = medication.unitsPerDay,
+                    daysOn = medication.daysOn,
+                    cycleLength = medication.cycleLength
+                )
+            } else {
+                medication.overrideDate.plusDays(medication.remainingDaysOverride.toLong())
+            }
+        } else if (medication.totalUnits != null) {
+            calculateRunsOutFromUnits(
+                startDate = medication.lastPickupDate,
+                remainingUnits = medication.totalUnits,
+                unitsPerDay = medication.unitsPerDay,
+                daysOn = medication.daysOn,
+                cycleLength = medication.cycleLength
+            )
         } else {
             medication.lastPickupDate.plusDays(medication.daysSupply.toLong())
         }
@@ -38,6 +57,35 @@ object StatusCalculator {
             orderByDate = orderByDate,
             status = status
         )
+    }
+
+    private fun calculateRunsOutFromUnits(
+        startDate: LocalDate,
+        remainingUnits: Int,
+        unitsPerDay: Int,
+        daysOn: Int?,
+        cycleLength: Int?
+    ): LocalDate {
+        val activeDays = remainingUnits / unitsPerDay.coerceAtLeast(1)
+
+        if (daysOn == null || cycleLength == null || daysOn >= cycleLength) {
+            // Non-cyclical: just add active days
+            return startDate.plusDays(activeDays.toLong())
+        }
+
+        // Cyclical: walk through cycles
+        var remaining = activeDays
+        var calendarDays = 0L
+        while (remaining > 0) {
+            val consumed = remaining.coerceAtMost(daysOn)
+            calendarDays += consumed
+            remaining -= consumed
+            if (remaining > 0) {
+                // Add the off-days before the next cycle
+                calendarDays += (cycleLength - daysOn)
+            }
+        }
+        return startDate.plusDays(calendarDays)
     }
 
     private fun minusBusinessDays(from: LocalDate, businessDays: Int): LocalDate {

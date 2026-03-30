@@ -14,5 +14,9 @@ data class MedicationEntity(
     val daysSupply: Int = 28,
     val orderLeadDays: Int? = null,
     val remainingDaysOverride: Int? = null,
-    val overrideDate: LocalDate? = null
+    val overrideDate: LocalDate? = null,
+    val totalUnits: Int? = null,
+    val unitsPerDay: Int = 1,
+    val daysOn: Int? = null,
+    val cycleLength: Int? = null
 )

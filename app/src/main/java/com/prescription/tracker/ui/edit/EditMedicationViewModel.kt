@@ -49,7 +49,12 @@ class EditMedicationViewModel(application: Application) : AndroidViewModel(appli
                 daysSupply = med.daysSupply.toString(),
                 orderLeadDays = med.orderLeadDays?.toString() ?: "",
                 remainingDaysOverride = med.remainingDaysOverride?.toString() ?: "",
-                isEditing = true
+                isEditing = true,
+                totalUnits = med.totalUnits?.toString() ?: "",
+                unitsPerDay = med.unitsPerDay.toString(),
+                isCyclical = med.daysOn != null,
+                daysOn = med.daysOn?.toString() ?: "",
+                cycleLength = med.cycleLength?.toString() ?: ""
             )
         }
         viewModelScope.launch {
@@ -83,6 +88,26 @@ class EditMedicationViewModel(application: Application) : AndroidViewModel(appli
         _uiState.value = _uiState.value.copy(remainingDaysOverride = value)
     }
 
+    fun updateTotalUnits(value: String) {
+        _uiState.value = _uiState.value.copy(totalUnits = value)
+    }
+
+    fun updateUnitsPerDay(value: String) {
+        _uiState.value = _uiState.value.copy(unitsPerDay = value)
+    }
+
+    fun updateIsCyclical(value: Boolean) {
+        _uiState.value = _uiState.value.copy(isCyclical = value)
+    }
+
+    fun updateDaysOn(value: String) {
+        _uiState.value = _uiState.value.copy(daysOn = value)
+    }
+
+    fun updateCycleLength(value: String) {
+        _uiState.value = _uiState.value.copy(cycleLength = value)
+    }
+
     private fun refreshWidget() {
         viewModelScope.launch {
             PrescriptionWidget().updateAll(getApplication())
@@ -110,8 +135,11 @@ class EditMedicationViewModel(application: Application) : AndroidViewModel(appli
 
     fun save() {
         val state = _uiState.value
-        val supply = state.daysSupply.toIntOrNull() ?: return
+        val supply = state.daysSupply.toIntOrNull() ?: 28
         if (state.name.isBlank()) return
+
+        val totalUnits = state.totalUnits.toIntOrNull()
+        val unitsPerDay = state.unitsPerDay.toIntOrNull() ?: 1
 
         viewModelScope.launch {
             val entity = MedicationEntity(
@@ -122,7 +150,11 @@ class EditMedicationViewModel(application: Application) : AndroidViewModel(appli
                 daysSupply = supply,
                 orderLeadDays = state.orderLeadDays.toIntOrNull(),
                 remainingDaysOverride = state.remainingDaysOverride.toIntOrNull(),
-                overrideDate = if (state.remainingDaysOverride.toIntOrNull() != null) LocalDate.now() else null
+                overrideDate = if (state.remainingDaysOverride.toIntOrNull() != null) LocalDate.now() else null,
+                totalUnits = totalUnits,
+                unitsPerDay = unitsPerDay,
+                daysOn = if (state.isCyclical) state.daysOn.toIntOrNull() else null,
+                cycleLength = if (state.isCyclical) state.cycleLength.toIntOrNull() else null
             )
             if (editingId != null) {
                 dao.update(entity)
@@ -152,5 +184,10 @@ data class EditUiState(
     val daysSupply: String = "28",
     val orderLeadDays: String = "",
     val remainingDaysOverride: String = "",
-    val isEditing: Boolean = false
+    val isEditing: Boolean = false,
+    val totalUnits: String = "",
+    val unitsPerDay: String = "1",
+    val isCyclical: Boolean = false,
+    val daysOn: String = "",
+    val cycleLength: String = ""
 )

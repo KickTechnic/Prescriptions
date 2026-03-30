@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -41,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
@@ -238,14 +240,84 @@ fun EditMedicationScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // Dosage section
             OutlinedTextField(
-                value = state.daysSupply,
-                onValueChange = { viewModel.updateDaysSupply(it.filter { c -> c.isDigit() }) },
-                label = { Text("Days supply") },
+                value = state.totalUnits,
+                onValueChange = { viewModel.updateTotalUnits(it.filter { c -> c.isDigit() }) },
+                label = { Text("Total units dispensed (optional)") },
+                placeholder = { Text("e.g. 120 capsules") },
+                supportingText = { Text("Leave empty for simple day-count tracking") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            if (state.totalUnits.toIntOrNull() != null) {
+                OutlinedTextField(
+                    value = state.unitsPerDay,
+                    onValueChange = { viewModel.updateUnitsPerDay(it.filter { c -> c.isDigit() }) },
+                    label = { Text("Units per day") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text("Cyclical schedule", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "e.g. 14 days on, 14 days off",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = state.isCyclical,
+                        onCheckedChange = { viewModel.updateIsCyclical(it) }
+                    )
+                }
+
+                if (state.isCyclical) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = state.daysOn,
+                            onValueChange = { viewModel.updateDaysOn(it.filter { c -> c.isDigit() }) },
+                            label = { Text("Days on") },
+                            placeholder = { Text("e.g. 14") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = state.cycleLength,
+                            onValueChange = { viewModel.updateCycleLength(it.filter { c -> c.isDigit() }) },
+                            label = { Text("Cycle length") },
+                            placeholder = { Text("e.g. 28") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+
+            if (state.totalUnits.toIntOrNull() == null) {
+                OutlinedTextField(
+                    value = state.daysSupply,
+                    onValueChange = { viewModel.updateDaysSupply(it.filter { c -> c.isDigit() }) },
+                    label = { Text("Days supply") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             OutlinedTextField(
                 value = state.orderLeadDays,
@@ -260,10 +332,13 @@ fun EditMedicationScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Save button
+            val isValid = state.name.isNotBlank() && (
+                state.totalUnits.toIntOrNull() != null || state.daysSupply.toIntOrNull() != null
+            )
             Button(
                 onClick = { viewModel.save() },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = state.name.isNotBlank() && state.daysSupply.toIntOrNull() != null
+                enabled = isValid
             ) {
                 Text(if (state.isEditing) "Save Changes" else "Add Medication")
             }
